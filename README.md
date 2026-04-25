@@ -189,6 +189,120 @@ approve
 
 ---
 
+## Usage
+
+### Starting a fresh pipeline
+
+Run `/orc` with any natural-language description of what you want to build. Be as specific or as broad as you like — specter will shape it into a full PRD.
+
+```
+/orc "Build a multi-tenant API key management dashboard for our SaaS platform"
+```
+
+```
+/orc "Add a subscription billing flow using Stripe — monthly and annual plans, proration on upgrade"
+```
+
+```
+/orc "Refactor the auth layer to support SSO via SAML 2.0 alongside existing email/password"
+```
+
+If no `.orc/` directory exists in the project, orc will first scaffold a GitHub repo (Phase 0) unless you're already inside one.
+
+---
+
+### Approving or revising the PRD
+
+After Phase 1 completes, orc pauses and asks you to review `.orc/prd.md`. You have two options:
+
+**Approve** — accept the PRD as-is and continue to ticket generation:
+```
+approve
+```
+
+**Revise** — reject the PRD and regenerate it with specific feedback:
+```
+revise The scope is too broad. Cut the admin dashboard entirely and focus only on the public API and rate limiting.
+```
+
+```
+revise Add more detail on the onboarding flow. The current PRD doesn't mention email verification or the welcome email sequence.
+```
+
+You can revise as many times as needed before approving. Each revision re-runs specter prd with your feedback as additional context.
+
+---
+
+### Resuming an interrupted pipeline
+
+If Claude Code closes, crashes, or you exit mid-pipeline, just run `/orc` again from the same project directory. Orc reads `.orc/state.json` to determine where you left off and picks up from there automatically:
+
+```
+/orc
+```
+
+No arguments needed — orc inspects `.orc/` and resumes at the right phase.
+
+---
+
+### Re-running a specific phase
+
+Use `--from` to jump to any phase regardless of current state. This is useful when you want to revise the PRD after it's already been approved, or regenerate tickets without changing the PRD.
+
+**Re-generate the PRD from scratch:**
+```
+/orc --from prd
+```
+
+**Re-generate tickets from the existing PRD** (e.g. after manually editing `.orc/prd.md`):
+```
+/orc --from tickets
+```
+
+**Re-trigger sweep** (e.g. if a sweep run stalled or you want to re-process unfinished tickets):
+```
+/orc --from sweep
+```
+
+> `--from` always overwrites the output of the target phase and all downstream phases.
+
+---
+
+### Checking pipeline status
+
+At any point, run:
+
+```
+/orc status
+```
+
+Orc prints the current phase, which files exist under `.orc/`, whether the PRD has been approved, and how many tickets were generated.
+
+---
+
+### Combining with a repo URL
+
+If you want orc to scaffold into a specific existing repo instead of creating a new one, include the URL in your prompt:
+
+```
+/orc "Add real-time notifications to https://github.com/myorg/myapp"
+```
+
+Orc skips Phase 0 and starts from PRD generation using the provided repo as context.
+
+---
+
+### Editing `.orc/` files manually
+
+All pipeline artifacts are plain Markdown files — you can edit them directly before continuing. Common patterns:
+
+- **Edit `.orc/prd.md` before approving** — adjust scope, priorities, or wording before orc generates tickets from it.
+- **Edit `.orc/tickets.md` after Phase 2** — reorder tickets, remove tickets, or add acceptance criteria before sweep starts.
+
+After editing, resume the pipeline normally (`/orc`) or jump to sweep directly (`/orc --from sweep`).
+
+---
+
 ## Uninstall
 
 ```sh
